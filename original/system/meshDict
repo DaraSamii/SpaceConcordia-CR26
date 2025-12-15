@@ -1,0 +1,208 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                |
+| \\      /  F ield         | cfMesh: A library for mesh generation          | 
+|  \\    /   O peration     |                                                |
+|   \\  /    A nd           | Author: Franjo Juretic                         | 
+|    \\/     M anipulation  | E-mail: franjo.juretic@c-fields.com            |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version   2.0;
+    format    ascii;
+    class     dictionary;
+    location  "system";
+    object    meshDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../parameters.cs"
+
+surfaceFile "constant/triSurface/combined.fms";
+//surfaceFile "geometry/combined.stl";
+
+
+mu #calc "asin(1.0/$Ma)";
+A #calc "4 * tan($mu)";
+Pend #calc "$yMax / tan($mu)";
+Rocket_L 3.5;
+
+#message "===========================";
+#message " mu is $mu";
+#message "===========================";
+
+
+maxCellSize $maxCellSize;
+symmetryPlaneLayerTopology	0;
+meshMultipleDomainsAndBaffles	0;
+nCellsBetweenLevels	4;
+domainDefinition
+{
+    convertAllPatchesToFaceZones	1;
+    detachPointsAtAllInternalPatches	0;
+    domainNames	();
+    generateMeshInAllDomains	1;
+}
+
+edgeMeshRefinement
+{
+
+    edges
+    {
+        //edgeFile "constant/triSurface/rocketPractice.eMesh";
+        edgeFile "constant/triSurface/rocket.eMesh";
+
+
+        additionalRefinementLevels    9;
+    }
+
+}
+localRefinement
+{
+
+    rocket
+    {
+        additionalRefinementLevels	7;
+        //cellSize #calc "$firstLayerThickness * 10.0";
+        refinementThickness 0.1;
+    }
+
+}
+
+objectRefinements
+{
+
+    box0
+    {
+        type box;
+        //cellSize #calc "$maxCellSize / 2.0";
+        additionalRefinementLevels	1;
+        centre (#calc "$xMax / 2.0" 0 0);
+        lengthX #calc "$xMax + 5";
+        lengthY 5;
+        lengthZ 5;
+    }
+    box1
+    {
+        type box;
+        //cellSize #calc "$maxCellSize / 2.0";
+        additionalRefinementLevels	2;
+        centre (#calc "$xMax / 2.0" 0 0);
+        lengthX #calc "$xMax + 4";
+        lengthY 4;
+        lengthZ 4;
+    }
+    
+    box2
+    {
+        type box;
+        //cellSize #calc "$maxCellSize / 4.0";
+        additionalRefinementLevels	3;
+
+        centre (#calc "$xMax / 2.0" 0 0);
+        lengthX #calc "$xMax + 3";
+        lengthY 3;
+        lengthZ 3;
+    }
+    box3
+    {
+        type box;
+        //cellSize #calc "$maxCellSize / 8.0";
+        additionalRefinementLevels	4;
+        centre (#calc "$xMax / 2.0" 0 0);
+        lengthX #calc "$xMax + 2";
+        lengthY 2;
+        lengthZ 2;
+    }
+
+    box4
+    {
+        type box;
+        //cellSize #calc "$maxCellSize / 8.0";
+        additionalRefinementLevels	5;
+        centre (#calc "$xMax / 2.0" 0 0);
+        lengthX #calc "$xMax + 1";
+        lengthY 1;
+        lengthZ 1;
+    }
+
+
+    cone
+    {
+        type cone;
+        additionalRefinementLevels	5;
+        p0 ( -1 0 0);
+        p1 ( $Rocket_L 0 0);
+        radius0 0.0;
+        radius1 #calc "$A + $radius0";
+    }
+
+    hollowCone1
+    {
+        type hollowCone;
+        additionalRefinementLevels	5;
+        p0 ( $Rocket_L 0 0);
+        p1 ( #calc "$Rocket_L + $Pend"  0 0);
+        radius0_Inner 0.0;
+        radius0_Outer #calc "$A";
+        radius1_Inner $yMax;
+        radius1_Outer #calc "$A + $yMax";
+    }
+}
+
+boundaryLayers
+{
+/*
+    patchBoundaryLayers
+    {
+        rocket
+        {
+            nLayers 7;
+            thicknessRatio 1.2;
+            //maxFirstLayerThickness $firstLayerThickness;
+
+            allowDiscontinuity 0;
+        }
+    }
+
+    optimiseLayer true;
+
+    optimisationParameters
+    {
+        nSmoothNormals 10;
+        maxNumIterations 20;
+        featureSizeFactor 0.4;
+        reCalculateNormals true;
+        relThicknessTol 0.1;
+        
+    }
+
+*/
+}
+renameBoundary
+{
+    patchBoundaryLayers
+    {
+        inlet
+        {
+             type            patch;
+        }
+        outlet
+        {
+            type            patch;    
+        }
+        sides
+        {
+            type            patch;    
+        }
+        rocket
+        {
+            type            wall;
+        }
+    }
+}
+
+
+
+// ************************************************************************* //

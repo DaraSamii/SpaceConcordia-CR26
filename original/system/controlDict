@@ -1,0 +1,385 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  11
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "../parameters.cs"
+
+application     rhoSimpleFoam;
+
+//startFrom       startTime;
+startFrom       latestTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         8000;  
+
+deltaT         1;
+
+maxDeltaT      1;
+
+writeControl    timeStep;
+
+writeInterval   $WriteInterval;
+
+purgeWrite      10;
+
+writeFormat     ascii;
+
+writePrecision  6;	
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;	
+
+writeCompression off;
+
+runTimeModifiable true;
+
+adjustTimeStep  true;
+
+maxCo   0.5;
+
+
+
+
+alpha #calc "$AoA * 3.14159265358979323846 / 180.0";
+
+sinAlphaN #calc "-sin($alpha * 1.0)";
+cosAlphaN #calc "-cos($alpha * 1.0)";
+sinAlpha #calc "sin($alpha * 1.0)";
+cosAlpha #calc "cos($alpha * 1.0)";
+
+a       #calc "sqrt($gamma * $R * $T)";
+U       #calc "$Ma * $a";
+
+
+
+
+
+functions
+{
+
+    //#includeFunc residuals
+    minMax
+    {
+        enabled	true;
+        fields	(Ma U p rho T k omega);
+        libs	("libfieldFunctionObjects.so" );
+        log	true;
+        type	fieldMinMax;
+        write	true;
+    }
+    
+    forceCoeffs
+    {
+        type            forceCoeffs;
+        libs            ("libforces.so");
+        writeControl    timeStep;
+        writeInterval   1;
+
+        patches
+        (
+            rocket
+        );
+
+        log         true;
+        rhoInf      1;
+        CofR        (0 0 0);
+        liftDir     ($sinAlphaN $cosAlpha 0);
+        dragDir     ($cosAlpha $sinAlpha 0);
+        pitchAxis   (0 0 1);
+        magUInf     $U;
+        lRef        3;
+        Aref        0.0188545853;
+    }
+
+//=====================================================================================================//
+
+    forces
+    {
+        type forces;                         // Function object for force calculation
+        libs ("libforces.so"); // Library required for force calculations
+        patches ("rocket");                  // Name of the boundary patch
+        
+        // Field names
+        p               p;
+        U               U;
+        rho             rho;
+
+        // Reference pressure [Pa]
+        pRef            $P;
+        log true;                            // Log results to a file
+
+        // Optional: Specify center of rotation for moment calculation
+        CofR (0 0 0);                        // Replace with the desired center of rotation
+    }
+
+//=====================================================================================================// 
+    // yPlus calculation for wall boundary monitoring
+    yPlus1
+    {
+
+        type            yPlus;
+        libs            ("libfieldFunctionObjects.so");
+        
+        writePrecision  8;
+        writeToFile     true;
+        useUserTime     true;
+        region          region0;
+        enabled         true;
+        log             true;
+        timeStart       0;
+        timeEnd         $endTime;
+        executeControl  timeStep;
+        executeInterval 1;
+        writeControl    timeStep;
+        writeInterval   $WriteInterval;
+    }
+    
+//=====================================================================================================//
+
+    MachNo
+    {
+        // Mandatory entries
+        type            MachNo;
+        libs            ("libfieldFunctionObjects.so");
+    
+        // Field to use for Mach number calculation
+        field           U;               // Velocity field
+        rho             rho;             // Density field for compressible flows
+        p               p;               // Pressure field for compressible flows
+    
+        // Optional (inherited) entries
+        region          region0;         // Ensure the correct region
+        enabled         true;            // Enable the function
+        log             true;            // Write logs for debugging
+    
+        // Execution control
+        timeStart       0;               // Start from the beginning of the simulation
+        timeEnd         $endTime;               // End at simulation stop time
+        executeControl  $writeControl;         // Trigger function based on simulation time
+        executeInterval $writeInterval;            // Execute every 0.01 seconds of simulation time
+    
+        // Write control
+        writeControl    $writeControl;         // Save results based on runTime
+        writeInterval   $writeInterval;            // Write every 0.01 seconds of simulation time
+    }
+    
+//=====================================================================================================// 
+    solverInfo
+    {
+        type            solverInfo;  // Function to print solver residuals
+        libs            ("libutilityFunctionObjects.so");
+    
+        log             false;  // Enable logging of residuals
+    
+        fields
+        (
+        U e k omega p //epsilon
+        );
+    }
+
+//=====================================================================================================//
+// Gradient-based AMR: Compute velocity gradient magnitude for mesh refinement
+//=====================================================================================================//
+    calcGradient
+    {
+        libs            ("libutilityFunctionObjects.so");
+        type            coded;
+        name            computeVelocityGradientMag;
+        executeControl  timeStep;
+        executeInterval 1;
+        writeControl    $writeControl;
+        writeInterval   $writeInterval;
+
+        codeExecute
+        #{
+            const volVectorField& U = mesh().lookupObject<volVectorField>("U");
+
+            static autoPtr<volScalarField> velocityGradientMagPtr;
+            if(!velocityGradientMagPtr.valid()) {
+              Info << "Creating velocityGradientMag" << nl;
+
+              velocityGradientMagPtr.set
+              (
+                  new volScalarField
+                  (
+                    IOobject
+                    (
+                        "velocityGradientMag",
+                        time_.timeName(),
+                        U.mesh(),
+                        IOobject::NO_READ,
+                        IOobject::AUTO_WRITE
+                    ),
+                    mag(fvc::grad(U))
+                  )
+              );
+            }
+            volScalarField &velocityGradientMag = velocityGradientMagPtr();
+            velocityGradientMag.checkIn();
+            velocityGradientMag = mag(fvc::grad(U));
+            Info << " max velocityGradientMag " << max(velocityGradientMag) << nl;
+        #};
+    }
+
+    
+//=====================================================================================================//
+
+//=====================================================================================================//
+
+sliceCentreY
+{
+    type            surfaces;
+    libs            ("libsampling.so");
+    writeControl    $writeControl;
+    writeInterval   $writeInterval;
+    surfaceFormat   vtk;
+    setFormat       raw;       // optional, but cleaner for VTK
+    interpolationScheme cellPointFace;  // best for slices :contentReference[oaicite:3]{index=3}
+
+    fields
+    (
+        U T p Ma rho k omega
+    );
+
+    surfaces
+    (
+        planeSlice
+        {
+            type            cuttingPlane;
+            planeType       pointAndNormal;
+            pointAndNormalDict
+            {
+                point     (0 0 0);
+                normal  (0 1 0);
+            }
+            interpolate     true;
+            mergeTol        1e-8;   // tolerance to clean tiny gaps :contentReference[oaicite:4]{index=4}
+        }
+    );
+}
+
+//=====================================================================================================//
+
+sliceCentreZ
+{
+    type            surfaces;
+    libs            ("libsampling.so");
+    writeControl    $writeControl;
+    writeInterval   $writeInterval;
+    surfaceFormat   vtk;
+    setFormat       raw;       // optional, but cleaner for VTK
+    interpolationScheme cellPointFace;  // best for slices :contentReference[oaicite:3]{index=3}
+
+    fields
+    (
+        U T p Ma rho k omega
+    );
+
+    surfaces
+    (
+        planeSlice
+        {
+            type            cuttingPlane;
+            planeType       pointAndNormal;
+            pointAndNormalDict
+            {
+                point     (0 0 0);
+                normal  (0 0 1);
+            }
+            interpolate     true;
+            mergeTol        1e-8;   // tolerance to clean tiny gaps :contentReference[oaicite:4]{index=4}
+        }
+    );
+}
+
+rocketVTK
+{
+    type            surfaces;
+    libs            ("libsampling.so");
+    writeControl    $writeControl;
+    writeInterval   $writeInterval;
+
+    surfaceFormat   vtk;
+
+    fields
+    (
+        U
+        T
+        p
+        Ma
+        rho
+        k
+        omega
+        alpha
+        nut
+        velocityGradientMag
+    );
+
+    surfaces
+    (
+        rocketWall
+        {
+            type            patch;
+            patches         (rocket); // this is your wall patch
+            interpolate     true;
+        }
+    );
+
+    interpolationScheme cell;
+}
+
+
+    copySchemesAccurate
+    {
+        type            coded;
+        libs            ("libutilityFunctionObjects.so");
+        name            copySchemes;
+        
+        codeExecute
+        #{
+            if (mesh().time().timeIndex() == 300)
+            {
+                Info << "Switching to accurate schemes at iteration 300" << endl;
+                system("cp system/fvSchemes.accurate system/fvSchemes");
+            }
+        #};
+    }
+
+/*
+
+    copySchemesAccurate1
+    {
+        type            coded;
+        libs            ("libutilityFunctionObjects.so");
+        name            copySchemes;
+        
+        codeExecute
+        #{
+            if (mesh().time().timeIndex() == 1500)
+            {
+                Info << "Switching to accurate schemes at iteration 500" << endl;
+                system("cp system/fvSchemes.accurate1 system/fvSchemes");
+            }
+        #};
+    }
+*/
+}
+
+// ************************************************************************* //
