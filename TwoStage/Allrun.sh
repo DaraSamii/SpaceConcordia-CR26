@@ -16,8 +16,7 @@ echo "Running in: $(pwd)"
 echo "Loading OpenFOAM v2406 environment..."
 if module avail openfoam/v2406 &>/dev/null; then
     module purge
-    source ~/v2406/OpenFOAM-v2406/etc/bashrc
-    source ~/OpenFOAM/OpenFOAM-v2406/etc/bashrc
+    source ~/OpenFOAM/v2412/OpenFOAM-v2412/etc/bashrc
     numProcs=$SLURM_NTASKS
     echo "OpenFOAM v2406 loaded via module with $numProcs processors."
 else
