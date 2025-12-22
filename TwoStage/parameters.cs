@@ -23,4 +23,4 @@ R       287.05;
 
 AoA 1.0;
 
-WriteInterval 2;
+WriteInterval 200;
