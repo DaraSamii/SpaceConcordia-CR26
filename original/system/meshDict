@@ -19,7 +19,7 @@ FoamFile
 
 #include "../parameters.cs"
 
-surfaceFile "constant/triSurface/combined.fms";
+surfaceFile "constant/triSurface/combined.stl";
 //surfaceFile "geometry/combined.stl";
 
 
@@ -54,7 +54,7 @@ edgeMeshRefinement
         edgeFile "constant/triSurface/rocket.eMesh";
 
 
-        additionalRefinementLevels    9;
+        additionalRefinementLevels    11;
     }
 
 }
@@ -72,7 +72,7 @@ localRefinement
 
 objectRefinements
 {
-
+/*
     box0
     {
         type box;
@@ -115,7 +115,6 @@ objectRefinements
         lengthY 2;
         lengthZ 2;
     }
-
     box4
     {
         type box;
@@ -126,7 +125,6 @@ objectRefinements
         lengthY 1;
         lengthZ 1;
     }
-
 
     cone
     {
@@ -149,6 +147,8 @@ objectRefinements
         radius1_Inner $yMax;
         radius1_Outer #calc "$A + $yMax";
     }
+*/
+    
 }
 
 boundaryLayers

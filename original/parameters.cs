@@ -10,7 +10,7 @@ zMin -10;
 zMax  10;
 
 // **Define Number of Cells**
-maxCellSize 2;
+maxCellSize 1;
 
 P 69681;
 T 268;
