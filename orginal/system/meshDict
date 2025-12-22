@@ -63,7 +63,7 @@ localRefinement
 
     rocket
     {
-        additionalRefinementLevels	5;
+        additionalRefinementLevels	7;    // This should be fixed
         //cellSize #calc "$firstLayerThickness * 10.0";
         refinementThickness 0.1;
     }

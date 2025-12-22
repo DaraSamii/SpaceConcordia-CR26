@@ -46,8 +46,6 @@ timeFormat      general;
 
 timePrecision   6;	
 
-writeCompression off;
-
 runTimeModifiable true;
 
 adjustTimeStep  true;
@@ -84,6 +82,8 @@ functions
         type	fieldMinMax;
         write	true;
     }
+
+//=====================================================================================================//
     
     forceCoeffs
     {
@@ -197,6 +197,7 @@ functions
 //=====================================================================================================//
 // Gradient-based AMR: Compute velocity gradient magnitude for mesh refinement
 //=====================================================================================================//
+/*
     calcGradient
     {
         libs            ("libutilityFunctionObjects.so");
@@ -238,7 +239,7 @@ functions
         #};
     }
 
-    
+*/
 //=====================================================================================================//
 
 //=====================================================================================================//
@@ -329,7 +330,7 @@ rocketVTK
         omega
         alpha
         nut
-        velocityGradientMag
+        //velocityGradientMag
     );
 
     surfaces

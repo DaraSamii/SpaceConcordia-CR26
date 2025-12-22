@@ -1,13 +1,18 @@
 
 // **Define Parameters for Mesh Dimensions**
 xMin -4;
-xMax 30;
+xMax 10;
 
 yMin -10;
 yMax  10;
 
 zMin -10;
 zMax  10;
+
+
+//Geometry "OneStage";
+Geometry "TwoStage";
+
 
 // **Define Number of Cells**
 maxCellSize 1.5;
