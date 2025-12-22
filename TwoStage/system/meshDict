@@ -63,7 +63,7 @@ localRefinement
 
     rocket
     {
-        additionalRefinementLevels	7;
+        additionalRefinementLevels	5;
         //cellSize #calc "$firstLayerThickness * 10.0";
         refinementThickness 0.1;
     }
@@ -72,7 +72,7 @@ localRefinement
 
 objectRefinements
 {
-
+/*
     box0
     {
         type box;
@@ -83,11 +83,12 @@ objectRefinements
         lengthY 5;
         lengthZ 5;
     }
+        */
     box1
     {
         type box;
         //cellSize #calc "$maxCellSize / 2.0";
-        additionalRefinementLevels	2;
+        additionalRefinementLevels	1;
         centre (#calc "$xMax / 2.0" 0 0);
         lengthX #calc "$xMax + 4";
         lengthY 4;
@@ -98,7 +99,7 @@ objectRefinements
     {
         type box;
         //cellSize #calc "$maxCellSize / 4.0";
-        additionalRefinementLevels	3;
+        additionalRefinementLevels	2;
 
         centre (#calc "$xMax / 2.0" 0 0);
         lengthX #calc "$xMax + 3";
@@ -109,7 +110,7 @@ objectRefinements
     {
         type box;
         //cellSize #calc "$maxCellSize / 8.0";
-        additionalRefinementLevels	4;
+        additionalRefinementLevels	3;
         centre (#calc "$xMax / 2.0" 0 0);
         lengthX #calc "$xMax + 2";
         lengthY 2;
@@ -119,7 +120,7 @@ objectRefinements
     {
         type box;
         //cellSize #calc "$maxCellSize / 8.0";
-        additionalRefinementLevels	5;
+        additionalRefinementLevels	4;
         centre (#calc "$xMax / 2.0" 0 0);
         lengthX #calc "$xMax + 1";
         lengthY 1;
@@ -129,7 +130,7 @@ objectRefinements
     cone
     {
         type cone;
-        additionalRefinementLevels	5;
+        additionalRefinementLevels	4;
         p0 ( -1 0 0);
         p1 ( $Rocket_L 0 0);
         radius0 0.0;
@@ -139,7 +140,7 @@ objectRefinements
     hollowCone1
     {
         type hollowCone;
-        additionalRefinementLevels	5;
+        additionalRefinementLevels	4;
         p0 ( $Rocket_L 0 0);
         p1 ( #calc "$Rocket_L + $Pend"  0 0);
         radius0_Inner 0.0;
