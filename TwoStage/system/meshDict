@@ -72,7 +72,7 @@ localRefinement
 
 objectRefinements
 {
-/*
+
     box0
     {
         type box;
@@ -147,13 +147,13 @@ objectRefinements
         radius1_Inner $yMax;
         radius1_Outer #calc "$A + $yMax";
     }
-*/
+
     
 }
 
 boundaryLayers
 {
-/*
+
     patchBoundaryLayers
     {
         rocket
@@ -177,8 +177,6 @@ boundaryLayers
         relThicknessTol 0.1;
         
     }
-
-*/
 }
 renameBoundary
 {
