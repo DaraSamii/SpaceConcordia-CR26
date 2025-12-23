@@ -1,7 +1,7 @@
 
 // **Define Parameters for Mesh Dimensions**
 xMin -4;
-xMax 10;
+xMax 30;
 
 yMin -10;
 yMax  10;

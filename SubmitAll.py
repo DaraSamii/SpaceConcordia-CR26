@@ -34,14 +34,27 @@ def copy_and_modify_case(original_dir, data_dir, copied_folder, modifications, j
         lines = file.readlines()
 
     for variable, new_value in modifications.items():
-        param_pattern = re.compile(rf'^\s*{variable}\s+([\d.eE+-]+);')
-        for i, line in enumerate(lines):
-            if param_pattern.match(line):
-                lines[i] = re.sub(param_pattern, f"{variable}        {new_value};", line)
-                print(f"Updated '{variable}' to {new_value} in {parameters_file}.")
-                break
+        # Handle both numeric values and string values (like Geometry)
+        if variable == "Geometry":
+            # Special handling for Geometry parameter with quotes
+            param_pattern = re.compile(rf'^\s*{variable}\s+"[^"]*";')
+            for i, line in enumerate(lines):
+                if param_pattern.match(line):
+                    lines[i] = f'{variable} "{new_value}";\n'
+                    print(f"Updated '{variable}' to \"{new_value}\" in {parameters_file}.")
+                    break
+            else:
+                raise ValueError(f"Variable '{variable}' not found in parameters file.")
         else:
-            raise ValueError(f"Variable '{variable}' not found in parameters file.")
+            # Handle numeric parameters
+            param_pattern = re.compile(rf'^\s*{variable}\s+([\d.eE+-]+);')
+            for i, line in enumerate(lines):
+                if param_pattern.match(line):
+                    lines[i] = f"{variable} {new_value};\n"
+                    print(f"Updated '{variable}' to {new_value} in {parameters_file}.")
+                    break
+            else:
+                raise ValueError(f"Variable '{variable}' not found in parameters file.")
 
     with open(parameters_file, 'w') as file:
         file.writelines(lines)
@@ -85,75 +98,115 @@ def copy_and_modify_case(original_dir, data_dir, copied_folder, modifications, j
 
 #===================================================================================================
 
-'''
-# Configuration
-original_dir = "./original"
-data_dir = "./Data/Mesh"
+# STUDY 1: MESH SIZE STUDY
+#===================================================================================================
+print("\n" + "="*70)
+print("STARTING MESH SIZE STUDY")
+print("="*70)
 
-# Define mesh size variations for parametric study
-mesh_sizes = [0.8, 0.6, 0.5,0.4, 0.3, 0.2,]
+original_dir = "./original"
+data_dir_mesh = "./Data/Mesh_Study"
+
+# Define mesh size variations
+mesh_sizes = [2.0, 1.8, 1.6, 1.4, 1.2, 1.0, 0.8]
+
+# Create summary list
+mesh_summary = []
 
 # Loop over mesh sizes
 for mesh_size in mesh_sizes:
     # Create folder name based on mesh size
-    copied_folder = f"mesh_{str(mesh_size).replace('.', 'p')}"
-    job_name = f"mesh_{str(mesh_size).replace('.', 'p')}"
+    mesh_str = f"{mesh_size:.1f}".replace('.', 'p')
+    copied_folder = f"mesh_{mesh_str}"
+    job_name = f"mesh{mesh_str}"
     
     # Only modify the maxCellSize parameter
     modifications = {"maxCellSize": mesh_size}
     
-    print(f"\n{'='*50}")
-    print(f"Creating case with mesh size: {mesh_size}")
+    print(f"\n{'='*60}")
+    print(f"Creating case: Mesh Size = {mesh_size}")
     print(f"Folder name: {copied_folder}")
-    print(f"{'='*50}")
+    print(f"Job name: {job_name}")
+    print(f"{'='*60}")
     
-    copy_and_modify_case(original_dir, data_dir, copied_folder, modifications, job_name)
-    
-print(f"\n{'='*50}")
-print("All mesh size variations created and submitted!")
-print(f"{'='*50}")
+    copy_and_modify_case(original_dir, data_dir_mesh, copied_folder, modifications, job_name)
+    mesh_summary.append((mesh_size, copied_folder))
 
-# Summary of created cases
-print("\nSummary of created cases:")
-for mesh_size in mesh_sizes:
-    folder_name = f"mesh_{str(mesh_size).replace('.', 'p')}"
+print(f"\n{'='*70}")
+print("MESH SIZE STUDY COMPLETED!")
+print(f"{'='*70}")
+print("\nSummary of Mesh Study cases:")
+for mesh_size, folder_name in mesh_summary:
     print(f"  - {folder_name}: maxCellSize = {mesh_size}")
-    
-'''
 
-original_dir = "./original"
-data_dir = "./Data/AoA_Mach_Study"
+#===================================================================================================
+# STUDY 2: GEOMETRY, MACH, AND AOA STUDY
+#===================================================================================================
+print("\n" + "="*70)
+print("STARTING GEOMETRY, MACH NUMBER, AND ANGLE OF ATTACK STUDY")
+print("="*70)
+
+data_dir_parametric = "./Data/Parametric_Study"
 
 # Define parametric study ranges
-AoA_values = [0.0, 1.0, 2.0, 3.0]  # Angle of Attack in degrees
-Ma_values = [0.8, 1.2, 1.6, 2.0]  # Mach number values
-
+geometries = ["OneStage", "TwoStage"]
+Ma_values = [1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4]
+AoA_values = [1.0, 2.0, 3.0, 4.0, 5.0]
 
 # Create summary list
-case_summary = []
+parametric_summary = []
+case_counter = 0
 
-# Nested loop over AoA and Mach number
-for AoA in AoA_values:
+# Loop over geometries, Mach numbers, and AoA
+for geometry in geometries:
     for Ma in Ma_values:
-        case_counter += 1
-        
-        # Create folder name based on both parameters
-        # Convert decimals to avoid dots in folder names
-        AoA_str = f"{AoA:.1f}".replace('.', 'p')
-        Ma_str = f"{Ma:.1f}".replace('.', 'p')
-        copied_folder = f"AoA_{AoA_str}_Ma_{Ma_str}"
-        job_name = f"AoA{AoA_str}_Ma{Ma_str}"
-        
-        # Define modifications for both parameters
-        modifications = {
-            "AoA": AoA,
-            "Ma": Ma
-        }
-        
-        print(f"\n{'='*60}")
-        print(f"Creating case: AoA = {AoA}°, Ma = {Ma:.1f}")
-        print(f"Folder name: {copied_folder}")
-        print(f"Job name: {job_name}")
-        print(f"{'='*60}")
-        
-        copy_and_modify_case(original_dir, data_dir, copied_folder, modifications, job_name)
+        for AoA in AoA_values:
+            case_counter += 1
+            
+            # Create folder name based on all parameters
+            Ma_str = f"{Ma:.1f}".replace('.', 'p')
+            AoA_str = f"{AoA:.1f}".replace('.', 'p')
+            copied_folder = f"{geometry}_Ma_{Ma_str}_AoA_{AoA_str}"
+            job_name = f"{geometry[:3]}M{Ma_str}A{AoA_str}"
+            
+            # Define modifications for all parameters
+            modifications = {
+                "Geometry": geometry,
+                "Ma": Ma,
+                "AoA": AoA
+            }
+            
+            print(f"\n{'='*60}")
+            print(f"Case {case_counter}: Geometry = {geometry}, Ma = {Ma:.1f}, AoA = {AoA:.1f}°")
+            print(f"Folder name: {copied_folder}")
+            print(f"Job name: {job_name}")
+            print(f"{'='*60}")
+            
+            copy_and_modify_case(original_dir, data_dir_parametric, copied_folder, modifications, job_name)
+            parametric_summary.append((geometry, Ma, AoA, copied_folder))
+
+print(f"\n{'='*70}")
+print("PARAMETRIC STUDY COMPLETED!")
+print(f"{'='*70}")
+
+# Print summary by geometry
+for geometry in geometries:
+    print(f"\n{geometry} Cases:")
+    count = 0
+    for geom, ma, aoa, folder in parametric_summary:
+        if geom == geometry:
+            count += 1
+            print(f"  {count}. {folder}: Ma = {ma:.1f}, AoA = {aoa:.1f}°")
+
+#===================================================================================================
+# FINAL SUMMARY
+#===================================================================================================
+print("\n" + "="*70)
+print("ALL STUDIES COMPLETED - FINAL SUMMARY")
+print("="*70)
+print(f"\nTotal cases created:")
+print(f"  - Mesh Study: {len(mesh_summary)} cases")
+print(f"  - Parametric Study: {len(parametric_summary)} cases")
+print(f"  - TOTAL: {len(mesh_summary) + len(parametric_summary)} cases")
+print("\nAll jobs have been submitted to the cluster!")
+print("="*70 + "\n")

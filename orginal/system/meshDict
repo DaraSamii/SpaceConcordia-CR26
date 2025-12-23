@@ -159,7 +159,7 @@ boundaryLayers
     {
         rocket
         {
-            nLayers 7;
+            nLayers 10;
             thicknessRatio 1.2;
             //maxFirstLayerThickness $firstLayerThickness;
 
