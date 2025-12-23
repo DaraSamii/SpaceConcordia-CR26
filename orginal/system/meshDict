@@ -26,7 +26,7 @@ surfaceFile "constant/triSurface/combined.stl";
 mu #calc "asin(1.0/$Ma)";
 A #calc "4 * tan($mu)";
 Pend #calc "$yMax / tan($mu)";
-Rocket_L 3.5;
+Rocket_L 5;
 
 #message "===========================";
 #message " mu is $mu";
@@ -91,8 +91,8 @@ objectRefinements
         additionalRefinementLevels	1;
         centre (#calc "$xMax / 2.0" 0 0);
         lengthX #calc "$xMax + 4";
-        lengthY 4;
-        lengthZ 4;
+        lengthY 5;
+        lengthZ 5;
     }
     
     box2
@@ -103,8 +103,8 @@ objectRefinements
 
         centre (#calc "$xMax / 2.0" 0 0);
         lengthX #calc "$xMax + 3";
-        lengthY 3;
-        lengthZ 3;
+        lengthY 4;
+        lengthZ 4;
     }
     box3
     {
@@ -113,8 +113,8 @@ objectRefinements
         additionalRefinementLevels	3;
         centre (#calc "$xMax / 2.0" 0 0);
         lengthX #calc "$xMax + 2";
-        lengthY 2;
-        lengthZ 2;
+        lengthY 3;
+        lengthZ 3;
     }
     box4
     {
@@ -123,15 +123,15 @@ objectRefinements
         additionalRefinementLevels	4;
         centre (#calc "$xMax / 2.0" 0 0);
         lengthX #calc "$xMax + 1";
-        lengthY 1;
-        lengthZ 1;
+        lengthY 2;
+        lengthZ 2;
     }
 
     cone
     {
         type cone;
         additionalRefinementLevels	4;
-        p0 ( -1 0 0);
+        p0 ( -2 0 0);
         p1 ( $Rocket_L 0 0);
         radius0 0.0;
         radius1 #calc "$A + $radius0";
