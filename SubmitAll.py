@@ -104,7 +104,7 @@ print("\n" + "="*70)
 print("STARTING MESH SIZE STUDY")
 print("="*70)
 
-original_dir = "./original"
+original_dir = "./orginal"
 data_dir_mesh = "./Data/Mesh_Study"
 
 # Define mesh size variations
