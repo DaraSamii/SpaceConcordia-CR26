@@ -195,8 +195,6 @@ functions
     }
 
 //=====================================================================================================//
-// Gradient-based AMR: Compute velocity gradient magnitude for mesh refinement
-//=====================================================================================================//
 /*
     calcGradient
     {
@@ -241,111 +239,112 @@ functions
 
 */
 //=====================================================================================================//
+    sliceCentreY
+    {
+        type            surfaces;
+        libs            ("libsampling.so");
+        writeControl    $writeControl;
+        writeInterval   $writeInterval;
+        surfaceFormat   vtk;
+        setFormat       raw;       // optional, but cleaner for VTK
+        interpolationScheme cellPointFace;  // best for slices :contentReference[oaicite:3]{index=3}
+
+        fields
+        (
+            U T p Ma rho k omega
+        );
+
+        surfaces
+        (
+            planeSlice
+            {
+                type            cuttingPlane;
+                planeType       pointAndNormal;
+                pointAndNormalDict
+                {
+                    point     (0 0 0);
+                    normal  (0 1 0);
+                }
+                interpolate     true;
+                mergeTol        1e-8;   // tolerance to clean tiny gaps :contentReference[oaicite:4]{index=4}
+            }
+        );
+    }
 
 //=====================================================================================================//
 
-sliceCentreY
-{
-    type            surfaces;
-    libs            ("libsampling.so");
-    writeControl    $writeControl;
-    writeInterval   $writeInterval;
-    surfaceFormat   vtk;
-    setFormat       raw;       // optional, but cleaner for VTK
-    interpolationScheme cellPointFace;  // best for slices :contentReference[oaicite:3]{index=3}
+    sliceCentreZ
+    {
+        type            surfaces;
+        libs            ("libsampling.so");
+        writeControl    $writeControl;
+        writeInterval   $writeInterval;
+        surfaceFormat   vtk;
+        setFormat       raw;       // optional, but cleaner for VTK
+        interpolationScheme cellPointFace;  // best for slices :contentReference[oaicite:3]{index=3}
 
-    fields
-    (
-        U T p Ma rho k omega
-    );
+        fields
+        (
+            U T p Ma rho k omega
+        );
 
-    surfaces
-    (
-        planeSlice
-        {
-            type            cuttingPlane;
-            planeType       pointAndNormal;
-            pointAndNormalDict
+        surfaces
+        (
+            planeSlice
             {
-                point     (0 0 0);
-                normal  (0 1 0);
+                type            cuttingPlane;
+                planeType       pointAndNormal;
+                pointAndNormalDict
+                {
+                    point     (0 0 0);
+                    normal  (0 0 1);
+                }
+                interpolate     true;
+                mergeTol        1e-8;   // tolerance to clean tiny gaps :contentReference[oaicite:4]{index=4}
             }
-            interpolate     true;
-            mergeTol        1e-8;   // tolerance to clean tiny gaps :contentReference[oaicite:4]{index=4}
-        }
-    );
-}
+        );
+    }
 
 //=====================================================================================================//
 
-sliceCentreZ
-{
-    type            surfaces;
-    libs            ("libsampling.so");
-    writeControl    $writeControl;
-    writeInterval   $writeInterval;
-    surfaceFormat   vtk;
-    setFormat       raw;       // optional, but cleaner for VTK
-    interpolationScheme cellPointFace;  // best for slices :contentReference[oaicite:3]{index=3}
 
-    fields
-    (
-        U T p Ma rho k omega
-    );
+    rocketVTK
+    {
+        type            surfaces;
+        libs            ("libsampling.so");
+        writeControl    $writeControl;
+        writeInterval   $writeInterval;
 
-    surfaces
-    (
-        planeSlice
-        {
-            type            cuttingPlane;
-            planeType       pointAndNormal;
-            pointAndNormalDict
+        surfaceFormat   vtk;
+
+        fields
+        (
+            U
+            T
+            p
+            Ma
+            rho
+            k
+            omega
+            alphat
+            nut
+            //velocityGradientMag
+        );
+
+        surfaces
+        (
+            rocketWall
             {
-                point     (0 0 0);
-                normal  (0 0 1);
+                type            patch;
+                patches         (rocket); // this is your wall patch
+                interpolate     true;
             }
-            interpolate     true;
-            mergeTol        1e-8;   // tolerance to clean tiny gaps :contentReference[oaicite:4]{index=4}
-        }
-    );
-}
+        );
 
-rocketVTK
-{
-    type            surfaces;
-    libs            ("libsampling.so");
-    writeControl    $writeControl;
-    writeInterval   $writeInterval;
+        interpolationScheme cell;
+    }
 
-    surfaceFormat   vtk;
-
-    fields
-    (
-        U
-        T
-        p
-        Ma
-        rho
-        k
-        omega
-        alpha
-        nut
-        //velocityGradientMag
-    );
-
-    surfaces
-    (
-        rocketWall
-        {
-            type            patch;
-            patches         (rocket); // this is your wall patch
-            interpolate     true;
-        }
-    );
-
-    interpolationScheme cell;
-}
-
+//=====================================================================================================//
 
     copySchemesAccurate
     {
@@ -363,7 +362,8 @@ rocketVTK
         #};
     }
 
-/*
+//=====================================================================================================//
+
 
     copySchemesAccurate1
     {
@@ -373,14 +373,14 @@ rocketVTK
         
         codeExecute
         #{
-            if (mesh().time().timeIndex() == 1500)
+            if (mesh().time().timeIndex() == 1000)
             {
-                Info << "Switching to accurate schemes at iteration 500" << endl;
-                system("cp system/fvSchemes.accurate1 system/fvSchemes");
+                Info << "Switching to accurate schemes at iteration 1000" << endl;
+                system("cp system/fvSchemes.MoreAccurate system/fvSchemes");
             }
         #};
     }
-*/
+
 }
 
-// ************************************************************************* //
+//=====================================================================================================//

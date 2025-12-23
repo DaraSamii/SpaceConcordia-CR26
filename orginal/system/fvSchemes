@@ -24,9 +24,11 @@ ddtSchemes
 
 gradSchemes
 {
-    default         cellLimited Gauss linear 1.0;
-    grad(p)         cellLimited Gauss linear 1.0;
-    limitedGrad     faceLimited Gauss linear 1.0;
+    default         cellLimited leastSquares 1;     // More accurate than Gauss linear
+    grad(p)         cellLimited leastSquares 1;     // Better for pressure gradients
+    grad(U)         cellLimited leastSquares 1;     // Better for velocity gradients
+    limitedGradFace faceLimited leastSquares 1;
+    limitedGrad     cellLimited leastSquares 1;
 }
 
 divSchemes
@@ -59,7 +61,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear limited 0.5;
+    default         Gauss linear limited 0.8;
 }
 
 interpolationSchemes

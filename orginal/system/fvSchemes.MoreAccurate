@@ -1,0 +1,99 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1806                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+fluxScheme          Tadmor;
+// Options: Tadmor, Kurganov
+
+ddtSchemes
+{
+    default         steadyState;
+    // Options: steadyState, Euler, localEuler, backward
+}
+
+gradSchemes
+{
+    default         cellLimited leastSquares 1;
+    grad(p)         cellLimited leastSquares 1;
+    grad(U)         cellLimited leastSquares 1;
+    limitedGradFace faceLimited leastSquares 1;
+    limitedGrad     cellLimited leastSquares 1;
+    // Options: Gauss linear, leastSquares, cellLimited, faceLimited
+}
+
+divSchemes
+{
+    default         none;
+
+    // Momentum
+    div(phi,U)      bounded Gauss linearUpwindV limitedGradFace;
+    // Options: upwind, linearUpwindV, vanLeerV, limitedLinearV
+
+    // Energy terms
+    div(phi,e)      bounded Gauss limitedLinear 1;
+    div(phi,Ekp)    bounded Gauss limitedLinear 1;
+    div(phi,h)      bounded Gauss limitedLinear 1;
+    div(phi,K)      bounded Gauss limitedLinear 1;
+    // Options: upwind, linearUpwind, vanLeer, limitedLinear, MUSCL
+
+    // Pressure flux
+    div(phid,p)     Gauss linearUpwind limitedGrad;
+    // Options: upwind, linearUpwind, vanLeer, limitedLinear, MUSCL
+
+    // Turbulence
+    div(phi,k)      bounded Gauss limitedLinear 1;
+    div(phi,omega)  bounded Gauss limitedLinear 1;
+    div(phi,nuTilda) bounded Gauss limitedLinear 1;
+    div(phi,epsilon) bounded Gauss limitedLinear 1;
+    // Options: upwind, linearUpwind, vanLeer, limitedLinear
+
+    // Viscous stress
+    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear limited 0.9;
+    // Options: limited 0.333, limited 0.5, limited 0.777, limited 1.0
+}
+
+interpolationSchemes
+{
+    default         linear;
+    reconstruct(rho) vanLeer;
+    reconstruct(U)   vanLeerV;
+    reconstruct(T)   vanLeer;
+    // Options: linear, upwind, vanLeer, vanLeerV, limitedLinear
+}
+
+snGradSchemes
+{
+    default         limited 0.9;
+    // Options: corrected, limited 0.333, limited 0.5, limited 0.777, limited 1.0
+}
+
+fluxRequired
+{
+    pCorr;
+}
+
+wallDist
+{
+    method          meshWave;
+    // Options: meshWave, Poisson, advection
+}
+
+// ************************************************************************* //
