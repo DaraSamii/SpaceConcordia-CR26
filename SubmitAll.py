@@ -105,7 +105,7 @@ print("STARTING MESH SIZE STUDY")
 print("="*70)
 
 original_dir = "./original"
-data_dir_mesh = "./Data/Mesh_Study"
+data_dir_mesh = "./Data1/Mesh_Study"
 
 # Define mesh size variations
 mesh_sizes = [2.0, 1.8, 1.6, 1.4, 1.2, 1.0, 0.8]
@@ -146,7 +146,7 @@ print("\n" + "="*70)
 print("STARTING GEOMETRY, MACH NUMBER, AND ANGLE OF ATTACK STUDY")
 print("="*70)
 
-data_dir_parametric = "./Data/Parametric_Study"
+data_dir_parametric = "./Data1/Parametric_Study"
 
 # Define parametric study ranges
 geometries = ["OneStage", "TwoStage"]
