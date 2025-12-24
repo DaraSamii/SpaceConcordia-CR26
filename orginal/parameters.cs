@@ -1,6 +1,6 @@
 
 // **Define Parameters for Mesh Dimensions**
-xMin -4;
+xMin -10;
 xMax 30;
 
 yMin -10;
@@ -15,17 +15,17 @@ Geometry "TwoStage";
 
 
 // **Define Number of Cells**
-maxCellSize 1.5;
+maxCellSize 2;
 
-P 69681;
-T 268;
+P 101325;
+T 300;
 
 
-Ma      1.2;
+Ma      1.8;
 gamma   1.4;
 R       287.05;
 
 
-AoA 1.0;
+AoA 6.0;
 
 WriteInterval 200;

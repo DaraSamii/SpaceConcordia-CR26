@@ -34,12 +34,13 @@ solvers
 
     "(p|pCorr).*"
     {
-        solver          GAMG;
-        smoother        GaussSeidel;
+        solver          PBiCGStab; // GAMG;
+        smoother        symGaussSeidel;
+        preconditioner  DILU; // diagonal; //DILU;
         tolerance       1e-10;
-        relTol          0.001;             
-        maxIter         100;               
-        minIter         5;                
+        relTol          0.001;
+        maxIter         100;
+        minIter         5;
     }
 
     "(e|h).*"
@@ -49,9 +50,9 @@ solvers
         nSweeps         3;
         preconditioner  DILU;
         tolerance       1e-10;
-        relTol          0.001;
+        relTol          0.01;
         minIter         10;
-        maxIter         100;
+        maxIter         10;
     }
 
     "(U|k|epsilon|omega|nuTilda).*"
@@ -61,19 +62,18 @@ solvers
         nSweeps     2;
         preconditioner  DILU;
         tolerance       1e-10;
-        relTol      0.001;
+        relTol      0.01;
         minIter     5;
-        maxIter     100;
+        maxIter     20;
     }
 }
 SIMPLE
 {
-    nCorrectors      4;
+    nCorrectors      3;
     nNonOrthogonalCorrectors 2;
     
     consistent	yes;
     transonic   yes;
-    momentumPredictor   yes;
 
     pMinFactor   0.1;
     pMaxFactor   3.0;
@@ -83,7 +83,7 @@ PIMPLE
 {
     nCorrectors      3;
     nOuterCorrectors 2;
-    nNonOrthogonalCorrectors 2;
+    nNonOrthogonalCorrectors 0;
     
     consistent	no;
 

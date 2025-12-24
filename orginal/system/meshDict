@@ -17,153 +17,264 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// ========================================================================
+// INCLUDE PARAMETERS
+// ========================================================================
 #include "../parameters.cs"
 
-surfaceFile "constant/triSurface/combined.stl";
-//surfaceFile "geometry/combined.stl";
+// ========================================================================
+// SURFACE FILE
+// ========================================================================
+surfaceFile "constant/triSurface/combined.fms";
 
+// ========================================================================
+// GEOMETRY PARAMETERS
+// ========================================================================
+Rocket_L 5;      // Rocket body length [m]
+Front_L  2.5;    // Front cone length [m]
 
+// ========================================================================
+// CALCULATED PARAMETERS
+// ========================================================================
+
+// Mach angle (for shock wave calculations)
 mu #calc "asin(1.0/$Ma)";
-A #calc "4 * tan($mu)";
+
+// Shock standoff distance
+A #calc "($Rocket_L + $Front_L) * tan($mu)";
+
+// Penetration distance
 Pend #calc "$yMax / tan($mu)";
-Rocket_L 5;
+
+// Angle of Attack conversion and calculations
+AoA_rad   #calc "$AoA * 3.14159265359 / 180";  // Convert AoA from degrees to radians
+yTail_end #calc "$xMax * tan($AoA_rad)";       // Y-offset at rocket tail due to AoA
 
 #message "===========================";
-#message " mu is $mu";
+#message " Mach angle (mu): $mu rad";
+#message " AoA: $AoA deg ($AoA_rad rad)";
 #message "===========================";
 
+// ========================================================================
+// GLOBAL MESH SETTINGS
+// ========================================================================
+maxCellSize                      $maxCellSize;
+symmetryPlaneLayerTopology       0;
+meshMultipleDomainsAndBaffles    0;
+nCellsBetweenLevels              4;
 
-maxCellSize $maxCellSize;
-symmetryPlaneLayerTopology	0;
-meshMultipleDomainsAndBaffles	0;
-nCellsBetweenLevels	4;
 domainDefinition
 {
-    convertAllPatchesToFaceZones	1;
-    detachPointsAtAllInternalPatches	0;
-    domainNames	();
-    generateMeshInAllDomains	1;
+    convertAllPatchesToFaceZones      1;
+    detachPointsAtAllInternalPatches  0;
+    domainNames                       ();
+    generateMeshInAllDomains          1;
 }
 
+// ========================================================================
+// EDGE REFINEMENT
+// ========================================================================
 edgeMeshRefinement
 {
-
     edges
     {
-        //edgeFile "constant/triSurface/rocketPractice.eMesh";
         edgeFile "constant/triSurface/rocket.eMesh";
-
-
-        additionalRefinementLevels    11;
+        additionalRefinementLevels 11;  // Very fine edges
     }
-
 }
+
+// ========================================================================
+// SURFACE REFINEMENT
+// ========================================================================
 localRefinement
 {
-
     rocket
     {
-        additionalRefinementLevels	7;    // This should be fixed
-        //cellSize #calc "$firstLayerThickness * 10.0";
-        refinementThickness 0.1;
+        additionalRefinementLevels  7;     // Surface refinement level
+        refinementThickness         0.3;   // Distance from surface [m]
     }
-
 }
 
+// ========================================================================
+// VOLUMETRIC REFINEMENT REGIONS
+// ========================================================================
 objectRefinements
 {
-/*
-    box0
+    // ====================================================================
+    // NOSE CONE REFINEMENT (Stagnation Point - Highest Gradients)
+    // ====================================================================
+    
+    // Finest refinement at stagnation point
+    noseCone_finest
     {
-        type box;
-        //cellSize #calc "$maxCellSize / 2.0";
-        additionalRefinementLevels	1;
-        centre (#calc "$xMax / 2.0" 0 0);
-        lengthX #calc "$xMax + 5";
-        lengthY 5;
-        lengthZ 5;
-    }
-        */
-    box1
-    {
-        type box;
-        //cellSize #calc "$maxCellSize / 2.0";
-        additionalRefinementLevels	1;
-        centre (#calc "$xMax / 2.0" 0 0);
-        lengthX #calc "$xMax + 4";
-        lengthY 5;
-        lengthZ 5;
+        type                        box;
+        additionalRefinementLevels  10;
+        centre                      (0 0 0);
+        lengthX                     0.05;
+        lengthY                     0.05;
+        lengthZ                     0.05;
     }
     
-    box2
+    noseCone_fine
     {
-        type box;
-        //cellSize #calc "$maxCellSize / 4.0";
-        additionalRefinementLevels	2;
-
-        centre (#calc "$xMax / 2.0" 0 0);
-        lengthX #calc "$xMax + 3";
-        lengthY 4;
-        lengthZ 4;
+        type                        box;
+        additionalRefinementLevels  9;
+        centre                      (0.2 0 0);
+        lengthX                     0.5;
+        lengthY                     0.15;
+        lengthZ                     0.15;
     }
-    box3
-    {
-        type box;
-        //cellSize #calc "$maxCellSize / 8.0";
-        additionalRefinementLevels	3;
-        centre (#calc "$xMax / 2.0" 0 0);
-        lengthX #calc "$xMax + 2";
-        lengthY 3;
-        lengthZ 3;
-    }
-    box4
-    {
-        type box;
-        //cellSize #calc "$maxCellSize / 8.0";
-        additionalRefinementLevels	4;
-        centre (#calc "$xMax / 2.0" 0 0);
-        lengthX #calc "$xMax + 1";
-        lengthY 2;
-        lengthZ 2;
-    }
-
-    cone
-    {
-        type cone;
-        additionalRefinementLevels	4;
-        p0 ( -2 0 0);
-        p1 ( $Rocket_L 0 0);
-        radius0 0.0;
-        radius1 #calc "$A + $radius0";
-    }
-
-    hollowCone1
-    {
-        type hollowCone;
-        additionalRefinementLevels	4;
-        p0 ( $Rocket_L 0 0);
-        p1 ( #calc "$Rocket_L + $Pend"  0 0);
-        radius0_Inner 0.0;
-        radius0_Outer #calc "$A";
-        radius1_Inner $yMax;
-        radius1_Outer #calc "$A + $yMax";
-    }
-
     
+    noseCone_medium
+    {
+        type                        box;
+        additionalRefinementLevels  8;
+        centre                      (0.3 0 0);
+        lengthX                     0.8;
+        lengthY                     0.25;
+        lengthZ                     0.25;
+    }
+
+    // ====================================================================
+    // NEAR-NOSE SPHERICAL REFINEMENT
+    // ====================================================================
+    
+    nearNose_inner
+    {
+        type                        box;
+        additionalRefinementLevels  3;
+        centre                      (-1 0 0);
+        lengthX                     4;
+        lengthY                     4;
+        lengthZ                     4;
+    }
+
+    nearNose_middle
+    {
+        type                        box;
+        additionalRefinementLevels  2;
+        centre                      (-1 0 0);
+        lengthX                     6;
+        lengthY                     6;
+        lengthZ                     6;
+    }
+
+    nearNose_outer
+    {
+        type                        box;
+        additionalRefinementLevels  1;
+        centre                      (-1 0 0);
+        lengthX                     8;
+        lengthY                     8;
+        lengthZ                     8;
+    }
+
+    // ====================================================================
+    // SHOCK WAVE CAPTURE - FRONT CONE REGION
+    // ====================================================================
+    
+    // Finest shock capture cone
+    shockCone_fine
+    {
+        type                        cone;
+        additionalRefinementLevels  5;
+        p0                          (-0.5 0 0);
+        p1                          ($Rocket_L 0 0);
+        radius0                     0.2;
+        radius1                     #calc "(($Rocket_L + 0.5) * tan($mu)) + $radius0";
+    }
+
+    // Broader shock capture cone
+    shockCone_medium
+    {
+        type                        cone;
+        additionalRefinementLevels  4;
+        p0                          (#calc "-1.0 * $Front_L" 0 0);
+        p1                          ($Rocket_L 0 0);
+        radius0                     0.0;
+        radius1                     #calc "$A + $radius0";
+    }
+
+    // Expansion fan capture (hollow cone behind rocket)
+    expansionFan
+    {
+        type                        hollowCone;
+        additionalRefinementLevels  4;
+        p0                          ($Rocket_L 0 0);
+        p1                          (#calc "$Rocket_L + $Pend" 0 0);
+        radius0_Inner               0.0;
+        radius0_Outer               #calc "$A";
+        radius1_Inner               $yMax;
+        radius1_Outer               #calc "$A + $yMax";
+    }
+
+    // ====================================================================
+    // WAKE REFINEMENT (Behind Rocket - AoA Adjusted)
+    // ====================================================================
+    
+    wake_finest
+    {
+        type                        cone;
+        additionalRefinementLevels  5;
+        p0                          (0 0 0);
+        p1                          ($xMax $yTail_end 0);
+        radius0                     0.7;
+        radius1                     0.7;
+    }
+
+    wake_fine
+    {
+        type                        cone;
+        additionalRefinementLevels  4;
+        p0                          (0 0 0);
+        p1                          ($xMax $yTail_end 0);
+        radius0                     2;
+        radius1                     2;
+    }
+
+    wake_medium
+    {
+        type                        cone;
+        additionalRefinementLevels  3;
+        p0                          (0 0 0);
+        p1                          ($xMax $yTail_end 0);
+        radius0                     3;
+        radius1                     3;
+    }
+
+    wake_coarse
+    {
+        type                        cone;
+        additionalRefinementLevels  2;
+        p0                          (0 0 0);
+        p1                          ($xMax $yTail_end 0);
+        radius0                     4;
+        radius1                     4;
+    }
+
+    wake_outer
+    {
+        type                        cone;
+        additionalRefinementLevels  1;
+        p0                          (0 0 0);
+        p1                          ($xMax $yTail_end 0);
+        radius0                     5;
+        radius1                     5;
+    }
 }
 
+// ========================================================================
+// BOUNDARY LAYER SETTINGS
+// ========================================================================
 boundaryLayers
 {
-
     patchBoundaryLayers
     {
         rocket
         {
-            nLayers 10;
-            thicknessRatio 1.2;
-            //maxFirstLayerThickness $firstLayerThickness;
-
-            allowDiscontinuity 0;
+            nLayers                     10;    // Number of prism layers
+            thicknessRatio              1.2;   // Growth ratio
+            allowDiscontinuity          0;     // Ensure continuous layers
         }
     }
 
@@ -171,37 +282,41 @@ boundaryLayers
 
     optimisationParameters
     {
-        nSmoothNormals 10;
-        maxNumIterations 20;
-        featureSizeFactor 0.4;
-        reCalculateNormals true;
-        relThicknessTol 0.1;
-        
+        nSmoothNormals       10;     // Smooth normal vectors
+        maxNumIterations     20;     // Maximum optimization iterations
+        featureSizeFactor    0.4;    // Feature size control
+        reCalculateNormals   true;   // Recalculate normals
+        relThicknessTol      0.1;    // Relative thickness tolerance
     }
 }
+
+// ========================================================================
+// BOUNDARY RENAME AND TYPE ASSIGNMENT
+// ========================================================================
 renameBoundary
 {
     patchBoundaryLayers
     {
         inlet
         {
-             type            patch;
+            type patch;
         }
+        
         outlet
         {
-            type            patch;    
+            type patch;
         }
+        
         sides
         {
-            type            patch;    
+            type patch;
         }
+        
         rocket
         {
-            type            wall;
+            type wall;
         }
     }
 }
-
-
 
 // ************************************************************************* //

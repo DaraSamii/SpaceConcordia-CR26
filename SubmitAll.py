@@ -104,7 +104,7 @@ print("\n" + "="*70)
 print("STARTING MESH SIZE STUDY")
 print("="*70)
 
-original_dir = "./orginal"
+original_dir = "./original"
 data_dir_mesh = "./Data/Mesh_Study"
 
 # Define mesh size variations
@@ -159,14 +159,18 @@ case_counter = 0
 
 # Loop over geometries, Mach numbers, and AoA
 for geometry in geometries:
+    print(f"\n{'*'*70}")
+    print(f"Creating cases for {geometry} geometry")
+    print(f"{'*'*70}")
+    
     for Ma in Ma_values:
         for AoA in AoA_values:
             case_counter += 1
             
-            # Create folder name based on all parameters
+            # Create folder structure: Parametric_Study/OneStage/Ma_1p2_AoA_1p0
             Ma_str = f"{Ma:.1f}".replace('.', 'p')
             AoA_str = f"{AoA:.1f}".replace('.', 'p')
-            copied_folder = f"{geometry}_Ma_{Ma_str}_AoA_{AoA_str}"
+            copied_folder = os.path.join(geometry, f"Ma_{Ma_str}_AoA_{AoA_str}")
             job_name = f"{geometry[:3]}M{Ma_str}A{AoA_str}"
             
             # Define modifications for all parameters
@@ -178,7 +182,7 @@ for geometry in geometries:
             
             print(f"\n{'='*60}")
             print(f"Case {case_counter}: Geometry = {geometry}, Ma = {Ma:.1f}, AoA = {AoA:.1f}°")
-            print(f"Folder name: {copied_folder}")
+            print(f"Folder path: {os.path.join(data_dir_parametric, copied_folder)}")
             print(f"Job name: {job_name}")
             print(f"{'='*60}")
             
@@ -191,7 +195,7 @@ print(f"{'='*70}")
 
 # Print summary by geometry
 for geometry in geometries:
-    print(f"\n{geometry} Cases:")
+    print(f"\n{geometry} Cases ({sum(1 for g, _, _, _ in parametric_summary if g == geometry)} total):")
     count = 0
     for geom, ma, aoa, folder in parametric_summary:
         if geom == geometry:
@@ -207,6 +211,6 @@ print("="*70)
 print(f"\nTotal cases created:")
 print(f"  - Mesh Study: {len(mesh_summary)} cases")
 print(f"  - Parametric Study: {len(parametric_summary)} cases")
+print(f"    * OneStage: {sum(1 for g, _, _, _ in parametric_summary if g == 'OneStage')} cases")
+print(f"    * TwoStage: {sum(1 for g, _, _, _ in parametric_summary if g == 'TwoStage')} cases")
 print(f"  - TOTAL: {len(mesh_summary) + len(parametric_summary)} cases")
-print("\nAll jobs have been submitted to the cluster!")
-print("="*70 + "\n")
