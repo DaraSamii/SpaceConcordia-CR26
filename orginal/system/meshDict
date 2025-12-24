@@ -91,7 +91,7 @@ localRefinement
     rocket
     {
         additionalRefinementLevels  7;     // Surface refinement level
-        refinementThickness         0.3;   // Distance from surface [m]
+        refinementThickness         0.5;   // Distance from surface [m]
     }
 }
 
@@ -136,7 +136,7 @@ objectRefinements
     }
 
     // ====================================================================
-    // NEAR-NOSE SPHERICAL REFINEMENT
+    // NEAR-NOSE BOX REFINEMENT
     // ====================================================================
     
     nearNose_inner
@@ -177,7 +177,7 @@ objectRefinements
     shockCone_fine
     {
         type                        cone;
-        additionalRefinementLevels  5;
+        additionalRefinementLevels  6;
         p0                          (-0.5 0 0);
         p1                          ($Rocket_L 0 0);
         radius0                     0.2;
@@ -218,8 +218,8 @@ objectRefinements
         additionalRefinementLevels  5;
         p0                          (0 0 0);
         p1                          ($xMax $yTail_end 0);
-        radius0                     0.7;
-        radius1                     0.7;
+        radius0                     1;
+        radius1                     1;
     }
 
     wake_fine
