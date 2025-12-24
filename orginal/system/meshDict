@@ -79,7 +79,7 @@ edgeMeshRefinement
     edges
     {
         edgeFile "constant/triSurface/rocket.eMesh";
-        additionalRefinementLevels 11;  // Very fine edges
+        additionalRefinementLevels 12;  // Very fine edges
     }
 }
 
@@ -272,9 +272,9 @@ boundaryLayers
     {
         rocket
         {
-            nLayers                     10;    // Number of prism layers
+            nLayers                     7;    // Number of prism layers
             thicknessRatio              1.2;   // Growth ratio
-            allowDiscontinuity          0;     // Ensure continuous layers
+            allowDiscontinuity          1;     // Ensure continuous layers
         }
     }
 
