@@ -47,7 +47,7 @@ A #calc "($Rocket_L + $Front_L) * tan($mu)";
 Pend #calc "$yMax / tan($mu)";
 
 // Angle of Attack conversion and calculations
-AoA_rad   #calc "$AoA * 3.14159265359 / 180";  // Convert AoA from degrees to radians
+AoA_rad   #calc "($AoA - 1.0) * 3.14159265359 / 180";  // Convert AoA from degrees to radians
 yTail_end #calc "$xMax * tan($AoA_rad)";       // Y-offset at rocket tail due to AoA
 
 #message "===========================";
