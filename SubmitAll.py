@@ -96,62 +96,14 @@ def copy_and_modify_case(original_dir, data_dir, copied_folder, modifications, j
     finally:
         os.chdir(initial_dir)
 
-#===================================================================================================
 
-# STUDY 1: MESH SIZE STUDY
-#===================================================================================================
-print("\n" + "="*70)
-print("STARTING MESH SIZE STUDY")
-print("="*70)
-
-original_dir = "./orginal"
-data_dir_mesh = "./Data1/Mesh_Study"
-
-# Define mesh size variations
-mesh_sizes = [2.4, 2.2, 2.0, 1.8, 1.6]
-
-# Create summary list
-mesh_summary = []
-
-# Loop over mesh sizes
-for mesh_size in mesh_sizes:
-    # Create folder name based on mesh size
-    mesh_str = f"{mesh_size:.1f}".replace('.', 'p')
-    copied_folder = f"mesh_{mesh_str}"
-    job_name = f"mesh{mesh_str}"
-    
-    # Only modify the maxCellSize parameter
-    modifications = {"maxCellSize": mesh_size}
-    
-    print(f"\n{'='*60}")
-    print(f"Creating case: Mesh Size = {mesh_size}")
-    print(f"Folder name: {copied_folder}")
-    print(f"Job name: {job_name}")
-    print(f"{'='*60}")
-    
-    copy_and_modify_case(original_dir, data_dir_mesh, copied_folder, modifications, job_name)
-    mesh_summary.append((mesh_size, copied_folder))
-
-print(f"\n{'='*70}")
-print("MESH SIZE STUDY COMPLETED!")
-print(f"{'='*70}")
-print("\nSummary of Mesh Study cases:")
-for mesh_size, folder_name in mesh_summary:
-    print(f"  - {folder_name}: maxCellSize = {mesh_size}")
-
-#===================================================================================================
-# STUDY 2: GEOMETRY, MACH, AND AOA STUDY
-#===================================================================================================
-print("\n" + "="*70)
-print("STARTING GEOMETRY, MACH NUMBER, AND ANGLE OF ATTACK STUDY")
-print("="*70)
 
 data_dir_parametric = "./Data1/Parametric_Study"
-
+original_dir = "./orginal"
 # Define parametric study ranges
 geometries = ["OneStage", "TwoStage"]
-Ma_values = [1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4]
-AoA_values = [1.0, 2.0, 3.0, 4.0, 5.0]
+Ma_values = [0.8, 1.0]
+AoA_values = [1.0]#], 2.0, 3.0, 4.0, 5.0]
 
 # Create summary list
 parametric_summary = []
