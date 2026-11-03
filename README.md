@@ -1,6 +1,6 @@
 # CR26 — Two-Stage Supersonic Rocket CFD & Flight Analysis
 
-CFD study, structural load cases and post-flight telemetry analysis of Space Concordia's **CR26** two-stage rocket, using OpenFOAM and cfMesh. The repository contains the simulation case, the HPC job generator, the post-processing notebooks and the results.
+CFD study and post-flight telemetry analysis of Space Concordia's **CR26** two-stage rocket, using OpenFOAM and cfMesh. The repository contains the simulation case, the HPC job generator, the post-processing notebooks and the results.
 
 ![Team at Launch Canada 2026](readme_imgs/team.jpg)
 
@@ -14,7 +14,7 @@ CR26 is Space Concordia's two-stage (booster + sustainer) rocket, launched at La
 - **TwoStage**: booster + sustainer stacked (boost phase)
 - **OneStage**: sustainer alone (after separation)
 
-The CFD outputs were then turned into body shear / bending-moment and fin-bending load cases, and after the flight the GPS/LoRa telemetry of both stages was analysed.
+After the flight, the GPS/LoRa telemetry of both stages was analysed.
 
 For the theory behind the setup (governing equations, turbulence model, mesh strategy, HPC workflow) see the [CR25 report](https://github.com/DaraSamii/SpaceConcordi-CR25/blob/main/CFD_spaceConcordia.pdf); the same methodology is used here.
 
@@ -53,7 +53,6 @@ CR26/
 ├── cleanAnalysis.ipynb       # CFD post-processing (mesh study, coefficients, CoP, validation, forces)
 ├── results/                  # CFD plots (PDF) produced by cleanAnalysis.ipynb
 ├── validation/               # RASAero / OpenRocket reference data
-├── loads/                    # structural load cases (body shear/moment, fin bending) + plots.ipynb
 ├── openrocket/               # OpenRocket design file (V5.1) and its report
 ├── telemetry/                # raw ground-station logs, flight analysis notebook, figures
 └── readme_imgs/
@@ -149,8 +148,3 @@ The raw simulation output (~11 GB) is not in the repository.
 ![Forces at Ma 2](readme_imgs/forces_Ma2.jpg)
 ![Normal force vs Mach](readme_imgs/Fy_vs_Ma.png)
 
-## Structural load cases
-Design body bending moment and sustainer fin loads for the critical flight points (sustainer ignition Ma 0.55, Ma 0.65, Ma 1.0, Ma 1.12, Ma 2.2). All cases are in [loads/](loads/).
-
-![Body bending moment](readme_imgs/comparison_body_moment.png)
-![Sustainer fins](readme_imgs/comparison_sustainer_fins.png)
